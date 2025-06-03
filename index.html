@@ -1,17 +1,215 @@
+
+
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>รายการงานทั้งหมด</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    iframe {
-      width: 100%;
-      height: 100vh;
-      border: none;
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: linear-gradient(135deg, #f6f9fc 0%, #edf2f7 100%);
+      min-height: 100vh;
+    }
+    .task-card {
+      transition: all 0.3s ease;
+    }
+    .task-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1), 0 8px 10px -6px rgba(59, 130, 246, 0.1);
+    }
+    .shimmer {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .days-badge {
+      transition: all 0.2s ease;
+    }
+    .days-badge:hover {
+      transform: scale(1.05);
     }
   </style>
 </head>
-<body>
-  <iframe src="https://script.google.com/macros/s/AKfycbxUzQIc5LGAsmESzUKcE5SWatPslHwyWzFTvWD6s_GFF2h4t6MxtD5JmHjpJySsDBX3xg/exec"></iframe>
-</body>
+<body class="p-4 md:p-6">
+  <div class="max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+      <div class="flex items-center justify-center mb-2">
+        <div class="bg-blue-100 p-3 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+          </svg>
+        </div>
+      </div>
+      <h1 class="text-2xl md:text-3xl font-semibold text-center text-blue-700 mb-1">รายการงานทั้งหมด</h1>
+      <p class="text-gray-500 text-center">จัดการงานและติดตามกำหนดส่ง</p>
+    </div>
+
+    <!-- Tasks Container -->
+    <div class="bg-white rounded-xl shadow-lg p-6">
+      <!-- Filter/Search (Optional) -->
+      <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="relative">
+          <input type="text" id="searchInput" placeholder="ค้นหางาน..." class="w-full md:w-64 pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+        <div class="flex gap-2">
+          <button class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+            </svg>
+            เรียงตามกำหนดส่ง
+          </button>
+          <button class="px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            เพิ่มงาน
+          </button>
+        </div>
+      </div>
+
+      <!-- Tasks Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+              <th class="px-4 py-3 text-left rounded-tl-lg">วิชา</th>
+              <th class="px-4 py-3 text-left">รายละเอียด</th>
+              <th class="px-4 py-3 text-left">วันที่สั่ง</th>
+              <th class="px-4 py-3 text-left">วันครบกำหนด</th>
+              <th class="px-4 py-3 text-left rounded-tr-lg">วันคงเหลือ</th>
+            </tr>
+          </thead>
+          <tbody id="tasksBody">
+            <tr>
+              <td colspan="5" class="text-center py-8">
+                <div class="flex flex-col items-center">
+                  <div class="shimmer h-8 w-8 rounded-full mb-3"></div>
+                  <div class="shimmer h-4 w-48 rounded mb-2"></div>
+                  <div class="shimmer h-3 w-36 rounded"></div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Footer -->
+    <div class="mt-6 text-center text-gray-500 text-sm">
+      <p>© 2023 ระบบจัดการงาน</p>
+    </div>
+  </div>
+
+  <script>
+    const GAS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxUzQIc5LGAsmESzUKcE5SWatPslHwyWzFTvWD6s_GFF2h4t6MxtD5JmHjpJySsDBX3xg/exec';
+
+    async function loadTasks() {
+      try {
+        const response = await fetch(GAS_WEBAPP_URL + '?action=getTasks');
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+        const tbody = document.getElementById('tasksBody');
+
+        if (!data.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" class="text-center py-10">
+                <div class="flex flex-col items-center">
+                  <div class="bg-gray-100 p-4 rounded-full mb-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  <p class="text-lg font-medium text-gray-600">ไม่มีข้อมูล</p>
+                  <p class="text-gray-400">ยังไม่มีงานที่ต้องทำในขณะนี้</p>
+                </div>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = data.map(t => {
+          // Calculate badge color based on days left
+          let badgeColor = 'bg-green-100 text-green-800'; // Default: plenty of time
+          if (t.leftDay <= 1) {
+            badgeColor = 'bg-red-100 text-red-800'; // Urgent: today or tomorrow
+          } else if (t.leftDay <= 3) {
+            badgeColor = 'bg-orange-100 text-orange-800'; // Soon: within 3 days
+          } else if (t.leftDay <= 7) {
+            badgeColor = 'bg-yellow-100 text-yellow-800'; // Upcoming: within a week
+          }
+          
+          return `
+            <tr class="task-card border-b hover:bg-blue-50">
+              <td class="px-4 py-3">
+                <div class="font-medium text-blue-700">${t.subject}</div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="text-gray-700">${t.description}</div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="text-gray-600 text-sm">${t.assignedDate}</div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="font-medium">${t.dueDate}</div>
+              </td>
+              <td class="px-4 py-3">
+                <span class="days-badge ${badgeColor} text-xs font-medium px-2.5 py-1 rounded-full">
+                  ${t.leftDay} วัน
+                </span>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        
+        // Add search functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', function() {
+          const searchTerm = this.value.toLowerCase();
+          const rows = document.querySelectorAll('#tasksBody tr');
+          
+          rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+          });
+        });
+        
+      } catch (error) {
+        console.error('Error loading tasks:', error);
+        document.getElementById('tasksBody').innerHTML = `
+          <tr>
+            <td colspan="5" class="text-center py-10">
+              <div class="flex flex-col items-center">
+                <div class="bg-red-100 p-4 rounded-full mb-3">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <p class="text-lg font-medium text-gray-600">โหลดข้อมูลไม่สำเร็จ</p>
+                <p class="text-gray-400">กรุณาลองใหม่อีกครั้ง</p>
+              </div>
+            </td>
+          </tr>
+        `;
+      }
+    }
+
+    loadTasks();
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9462d7d0f0d045b3',t:'MTc0ODMyMDkxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
